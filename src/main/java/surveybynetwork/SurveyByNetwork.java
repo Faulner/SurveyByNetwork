@@ -1,4 +1,4 @@
-package mainclass;
+package surveybynetwork;
 
 
 import java.awt.BorderLayout;
