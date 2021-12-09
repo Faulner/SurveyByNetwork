@@ -23,6 +23,10 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     
 //<editor-fold defaultstate="collapsed" desc="Declarations, main and Constructor">
 
+    // network bits
+    ChatServer server;
+
+    // ui elements
     ArrayList<SurveyRecord> surveyRecords = new ArrayList();
     Color localGreen = Color.decode("#267F00");
     Color localYellow = Color.decode("#FFFEEB");
@@ -40,15 +44,6 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     JTable questionTable;
     QuestionModel questionModel;
 
-
-    public static void main(String[] args)
-    {
-        SurveyByNetwork myFrame = new SurveyByNetwork();
-        myFrame.setSize(myFrame.getFrameSize());
-        myFrame.setLocation(400, 200);
-        myFrame.setResizable(true);
-        myFrame.setVisible(true);
-    }
 
     public Dimension getFrameSize()
     {
@@ -72,6 +67,8 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         renderDisplayPanel(baseLayout);
 
         this.addWindowListener(this);
+
+        server = new ChatServer(4444);
     }
 
 //</editor-fold>
