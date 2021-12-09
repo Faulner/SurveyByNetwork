@@ -15,7 +15,7 @@ Partly Agree
 Disagree
 Strongly Disagree
 12
-Requirments
+Requirements
 All the requirements were recorded.
 Strongly Agree
 Agree

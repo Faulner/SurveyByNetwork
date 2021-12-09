@@ -1,10 +1,7 @@
 package surveybynetwork;
 
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.TextArea;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -12,23 +9,17 @@ import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.util.ArrayList;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SpringLayout;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.Scanner;
-import javax.swing.BorderFactory;
-import javax.swing.JTextArea;
-
 
 
 public class SurveyByNetwork extends JFrame implements WindowListener, ActionListener
@@ -36,44 +27,64 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     
 //<editor-fold defaultstate="collapsed" desc="Declarations, main and Constructor">
 
-    JLabel lblWord1, lblWord2, lblSent, lblTopic, lblQn, lblA, lblB, lblC, lblD;
-    JTextArea txtWord1, txtWord2, txtTopic, txtQn, txtA, txtB, txtC, txtD;
+    JLabel lblWord1, lblWord2, lblSent, lblTopic, lblQn, lblA, lblB, lblC, lblD, lblE, lblSort;
+    JTextArea txtWord1, txtWord2, txtTopic, txtQn, txtA, txtB, txtC, txtD, txtE;
     JButton btnAdd;
-    ArrayList<Object[]> dataValues = new ArrayList();
-    JPanel rightPanel = new JPanel();
-    JTable table;
-    MyModel wordModel;
+    JButton btnSortByNumber;
+    JButton btnSortByTopic;
+    JButton btnSortByQuestion;
+    ArrayList<SurveyRecord> surveyRecords = new ArrayList();
+    JPanel basePanel, questionTablePanel, questionFooterPanel, answerTablePanel;
+    JTable questionTable;
+    QuestionModel questionModel;
+    Dimension frameSize = new Dimension(1000, 700);
+    Color localGreen = Color.decode("#267F00");
+    Color localYellow = Color.decode("#FFFEEB");
+    Color localGrey = Color.decode("#EFF2F7");
+    Color localBlue = Color.decode("#1F497D");
 
 
     public static void main(String[] args)
     {
-        JFrame myFrame = new SurveyByNetwork();
-        myFrame.setSize(1000,700);
+        SurveyByNetwork myFrame = new SurveyByNetwork();
+        myFrame.setSize(myFrame.getFrameSize());
         myFrame.setLocation(400, 200);
         myFrame.setResizable(true);
-        myFrame.setVisible(true);        
+        myFrame.setVisible(true);
+    }
+
+    public Dimension getFrameSize()
+    {
+        return frameSize;
     }
 
     public SurveyByNetwork()
     {
         setTitle("Survey by Network");
-        setBackground(Color.yellow);
+        SpringLayout appLayout = new SpringLayout();
+        setLayout(appLayout);
 
-        SpringLayout myLayout = new SpringLayout();
-        SpringLayout springpanelLayout = new SpringLayout();
-        setLayout(myLayout);
-        
-        AnswerTable(myLayout, springpanelLayout);
+        SpringLayout baseLayout = new SpringLayout();
+        basePanel = new JPanel();
+        basePanel.setLayout(baseLayout);
+        basePanel.setBackground(localYellow);
+        basePanel.setPreferredSize(getFrameSize());
+        this.add(basePanel);
+        //setBackground(Color.yellow);
+        setBackground(localYellow);
+
+        SpringLayout answerTableLayout = new SpringLayout();
+        AnswerTable(baseLayout, answerTableLayout);
                 
-        LocateLabels(myLayout);
-        LocateTextAreas(myLayout);
-        LocateButtons(myLayout);
-        LocatePanelTextAreas(springpanelLayout);
-        LocatePanelLabels(springpanelLayout);
+        LocateLabels(baseLayout);
+        LocateTextAreas(baseLayout);
+        LocateButtons(baseLayout);
+        LocateAnswerPanelTextAreas(answerTableLayout);
+        LocateAnswerPanelLabels(answerTablePanel, answerTableLayout);
         readFile("SurveyByNetwork_SurveyQuestions.txt");
         
         
-        QuestionTable(myLayout);
+        QuestionTable(baseLayout);
         
         
         this.addWindowListener(this);
@@ -90,98 +101,96 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
 
     public void LocateLabels(SpringLayout myLabelLayout)
     {
-        lblWord1  = LocateALabel(myLabelLayout, lblWord1, "Word 1:", 650, 500);
-        lblWord2 = LocateALabel(myLabelLayout, lblWord2, "Word 2:", 650, 650);
-        lblSent = LocateALabel(myLabelLayout, lblSent, "Sent:", 650, 750);
+        //lblWord1  = LocateALabel(myLabelLayout, lblWord1, "Word 1:", 650, 500);
+        //lblWord2 = LocateALabel(myLabelLayout, lblWord2, "Word 2:", 650, 650);
+        //lblSent = LocateALabel(myLabelLayout, lblSent, "Sent:", 650, 750);
     }
 
-    public JLabel LocateALabel(SpringLayout myLabelLayout, JLabel myLabel, String  LabelCaption, int x, int y)
+    public JLabel LocateALabel(JPanel parentPanel, SpringLayout parentLayout, JLabel myLabel, String  LabelCaption, int x, int y)
     {
         myLabel = new JLabel(LabelCaption);
-        add(myLabel);        
-        myLabelLayout.putConstraint(SpringLayout.WEST, myLabel, x, SpringLayout.WEST, this);
-        myLabelLayout.putConstraint(SpringLayout.NORTH, myLabel, y, SpringLayout.NORTH, this);
+        myLabel.setForeground(localBlue);
+        parentPanel.add(myLabel);
+        parentLayout.putConstraint(SpringLayout.WEST, myLabel, x, SpringLayout.WEST, this);
+        parentLayout.putConstraint(SpringLayout.NORTH, myLabel, y, SpringLayout.NORTH, this);
         return myLabel;
     }
    
     public void LocateTextAreas(SpringLayout myTextAreaLayout)
     {
-        txtWord1  = LocateATextArea(myTextAreaLayout, txtWord1, 100, 200, 1, 10);
-        txtWord2 = LocateATextArea(myTextAreaLayout, txtWord2, 100, 200, 1, 10);
+        //txtWord1  = LocateATextArea(myTextAreaLayout, txtWord1, 100, 200, 1, 10);
+        //txtWord2 = LocateATextArea(myTextAreaLayout, txtWord2, 100, 200, 1, 10);
     }
 
     public void LocateButtons(SpringLayout myButtonLayout)
     {
-        btnAdd = LocateAButton(myButtonLayout, btnAdd, "Add", 700, 500, 80, 25);   
-        
-    }
-    
-    public void LocatePanelTextAreas(SpringLayout myTextAreaLayout)
-    {
-        txtTopic = LocateATextArea(myTextAreaLayout, txtTopic, 45, 5, 1, 15 );
-        rightPanel.add(txtTopic);
-        
-        txtQn = LocateATextArea(myTextAreaLayout, txtQn, 45, 30, 3, 15 );
-        rightPanel.add(txtQn);
-        
-        txtA = LocateATextArea(myTextAreaLayout, txtA, 45, 86, 1, 15 );
-        rightPanel.add(txtA);
-        
-        txtB = LocateATextArea(myTextAreaLayout, txtB, 45, 111, 1, 15 );
-        rightPanel.add(txtB);
-        
-        txtC = LocateATextArea(myTextAreaLayout, txtC, 45, 136, 1, 15 );
-        rightPanel.add(txtC);
-        
-        txtD = LocateATextArea(myTextAreaLayout, txtD, 45, 161, 1, 15 );
-        rightPanel.add(txtD);
-        
-    }
-    
-    public void LocatePanelLabels(SpringLayout myLabelLayout)
-    {
-        lblTopic = LocateALabel(myLabelLayout, lblTopic, "Topic:", 5,3);
-        rightPanel.add(lblTopic);
-        
-        lblQn = LocateALabel(myLabelLayout, lblQn, "Qn:", 10,28);
-        rightPanel.add(lblQn);
-        
-        lblA = LocateALabel(myLabelLayout, lblA, "A:", 15,87);
-        rightPanel.add(lblA);
-        
-        lblB = LocateALabel(myLabelLayout, lblB, "B:", 15,112);
-        rightPanel.add(lblB);
-        
-        lblC = LocateALabel(myLabelLayout, lblC, "C:", 15,137);
-        rightPanel.add(lblC);
-        
-        lblD = LocateALabel(myLabelLayout, lblD, "D:", 15,162);
-        rightPanel.add(lblD);
+        //btnAdd = LocateAButton(myButtonLayout, btnAdd, "Add", 700, 500, 80, 25);
     }
 
+    public void LocateSortButtons(JPanel panel, SpringLayout myButtonLayout)
+    {
+        btnSortByNumber = LocateSortButton(panel, myButtonLayout, btnSortByNumber, "Qn #", 235, -25, 100, 25);
+        btnSortByTopic = LocateSortButton(panel, myButtonLayout, btnSortByTopic, "Topic", 335, -25, 100, 25);
+        btnSortByQuestion = LocateSortButton(panel, myButtonLayout, btnSortByQuestion, "Answer", 435, -25, 100, 25);
+    }
 
-    public JTextArea LocateATextArea(SpringLayout myLayout, JTextArea myTextArea, int x, int y, int w, int h)
+    public void LocateSortLabel(JPanel panel, SpringLayout myButtonLayout)
+    {
+        lblSort = LocateALabel(panel, myButtonLayout, lblSort, "Sort by:", 175,10);
+    }
+    
+    public void LocateAnswerPanelTextAreas(SpringLayout myTextAreaLayout)
+    {
+        txtTopic = LocateATextArea(answerTablePanel, myTextAreaLayout, txtTopic, 75, 15, 1, 25 );
+        txtQn = LocateATextArea(answerTablePanel, myTextAreaLayout, txtQn, 75, 40, 4, 25 );
+        txtQn.setLineWrap(true);
+        txtA = LocateATextArea(answerTablePanel, myTextAreaLayout, txtA, 75, 115, 1, 25 );
+        txtB = LocateATextArea(answerTablePanel, myTextAreaLayout, txtB, 75, 140, 1, 25 );
+        txtC = LocateATextArea(answerTablePanel, myTextAreaLayout, txtC, 75, 165, 1, 25 );
+        txtD = LocateATextArea(answerTablePanel, myTextAreaLayout, txtD, 75, 190, 1, 25 );
+        txtE = LocateATextArea(answerTablePanel, myTextAreaLayout, txtE, 75, 215, 1, 25 );
+    }
+    
+    public void LocateAnswerPanelLabels(JPanel parentPanel, SpringLayout parentLayout)
+    {
+        lblTopic = LocateALabel(parentPanel, parentLayout, lblTopic, "Topic:", 15,15);
+        lblQn = LocateALabel(parentPanel, parentLayout, lblQn, "Qn:", 15,40);
+        lblA = LocateALabel(parentPanel, parentLayout, lblA, "A:", 15,115);
+        lblB = LocateALabel(parentPanel, parentLayout, lblB, "B:", 15,140);
+        lblC = LocateALabel(parentPanel, parentLayout, lblC, "C:", 15,165);
+        lblD = LocateALabel(parentPanel, parentLayout, lblD, "D:", 15,190);
+        lblE = LocateALabel(parentPanel, parentLayout, lblE, "E:", 15,215);
+    }
+
+    public JTextArea LocateATextArea(JPanel parentPanel, SpringLayout parentLayout, JTextArea myTextArea, int x, int y, int w, int h)
     {    
         myTextArea = new JTextArea(w,h);
-        add(myTextArea);
-        myLayout.putConstraint(SpringLayout.WEST, myTextArea, x, SpringLayout.WEST, this);
-        myLayout.putConstraint(SpringLayout.NORTH, myTextArea, y, SpringLayout.NORTH, this);
+        parentPanel.add(myTextArea);
+        parentLayout.putConstraint(SpringLayout.WEST, myTextArea, x, SpringLayout.WEST, this);
+        parentLayout.putConstraint(SpringLayout.NORTH, myTextArea, y, SpringLayout.NORTH, this);
         myTextArea.setBorder(BorderFactory.createLineBorder(Color.black));
-        
-        
-        
         return myTextArea;
-        
     }
 
     public JButton LocateAButton(SpringLayout myButtonLayout, JButton myButton, String  ButtonCaption, int x, int y, int w, int h)
     {    
         myButton = new JButton(ButtonCaption);
-        add(myButton);
+        basePanel.add(myButton);
         myButton.addActionListener(this);
         myButtonLayout.putConstraint(SpringLayout.WEST, myButton, x, SpringLayout.WEST, this);
         myButtonLayout.putConstraint(SpringLayout.NORTH, myButton, y, SpringLayout.NORTH, this);
         myButton.setPreferredSize(new Dimension(w,h));
+        return myButton;
+    }
+
+    public JButton LocateSortButton(JPanel panel, SpringLayout myButtonLayout, JButton myButton, String  ButtonCaption, int x, int y, int w, int h)
+    {
+        myButton = new JButton(ButtonCaption);
+        myButton.addActionListener(this);
+        myButtonLayout.putConstraint(SpringLayout.WEST, myButton, x, SpringLayout.EAST, this);
+        myButtonLayout.putConstraint(SpringLayout.NORTH, myButton, y, SpringLayout.SOUTH, this);
+        myButton.setPreferredSize(new Dimension(w,h));
+        questionFooterPanel.add(myButton);
         return myButton;
     }
     
@@ -193,9 +202,7 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     
      public void readFile(String fileName)
     {
-        
-        
-        // Try to read in the data and if an exception occurs go to the Catch section 
+        // Try to read in the data and if an exception occurs go to the Catch section
         try
         {
             FileInputStream fstream = new FileInputStream(fileName);
@@ -204,7 +211,7 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
             
             int counter = 0;
             int objectarraycount = 0;
-            Object[] tempArray = new Object[8];
+            String[] tempArray = new String[8];
             String line;
             
             while ((line = br.readLine()) != null)
@@ -215,14 +222,13 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
                 if(counter ==7)
                 {
                     counter = 0;
-                    
-                    
                     if (objectarraycount > 0)
                     {
-                    dataValues.add(tempArray);
+                        SurveyRecord surveyRecord = new SurveyRecord();
+                        surveyRecord.setSurveyRecordDetails(tempArray);
+                        surveyRecords.add(surveyRecord);
                     }
-                    
-                    tempArray = new Object[8];
+                    tempArray = new String[8];
                     objectarraycount++;
                 }
                 
@@ -244,140 +250,100 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         }
     }
 
-    public void QuestionTable(SpringLayout myPanelLayout)
+    public void QuestionTable(SpringLayout parentLayout)
     { 
         // Create a panel to hold all other components
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new BorderLayout());
-        add(topPanel);
+        questionTablePanel = new JPanel();
+        questionTablePanel.setBackground(localYellow);
+        questionTablePanel.setPreferredSize(new Dimension(550, 250));
+        questionTablePanel.setBorder(BorderFactory.createLineBorder(localGreen));
+        parentLayout.putConstraint(SpringLayout.WEST, questionTablePanel, 10, SpringLayout.WEST, this);
+        parentLayout.putConstraint(SpringLayout.NORTH, questionTablePanel, 10, SpringLayout.NORTH, this);
+
+        BorderLayout questionTableLayout = new BorderLayout();
+        questionTablePanel.setLayout(questionTableLayout);
+        basePanel.add(questionTablePanel);
         
         // Create column names
         String columnNames[] =
-        { "Question Number", "Topic", "Question"};
+        { "#", "Topic", "Question"};
      
 
         // constructor of JTable model
-	wordModel = new MyModel(dataValues, columnNames);
+	    questionModel = new QuestionModel(surveyRecords, columnNames);
         
         // Create a new table instance
-        JTable table = new JTable(wordModel);
+        questionTable = new JTable(questionModel);
+        questionTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent event) {
+                if (questionTable.getSelectedRow() > -1) {
+                    DisplayQuestion(questionTable.getSelectedRow());
+                }
+            }
+        });
+        questionTable.getColumnModel().getColumn(0).setPreferredWidth(15);
+        questionTable.getColumnModel().getColumn(1).setPreferredWidth(120);
+        questionTable.getColumnModel().getColumn(2).setPreferredWidth(300);
 
-        // Configure some of JTable's paramters
-        table.isForegroundSet();
-        table.setShowHorizontalLines(true);
-        table.setRowSelectionAllowed(true);
-        table.setColumnSelectionAllowed(true);
-        //table.putConstraint(SpringLayout.WEST, table, 10, SpringLayout.WEST, this);
-        //table.putConstraint(SpringLayout.NORTH, table, 10, SpringLayout.NORTH, this);
-        add(table);
+        // Configure some of JTable's parameters
+        questionTable.isForegroundSet();
+        questionTable.setShowHorizontalLines(true);
+        questionTable.setRowSelectionAllowed(true);
+        questionTable.setColumnSelectionAllowed(false);
+        questionTable.getTableHeader().setForeground(localBlue);
 
         // Change the text and background colours
-        table.setSelectionForeground(Color.white);
-        table.setSelectionBackground(Color.red);
+        questionTable.setSelectionForeground(Color.white);
+        questionTable.setSelectionBackground(localGreen);
 
         // Add the table to a scrolling pane, size and locate
-        JScrollPane scrollPane = table.createScrollPaneForTable(table);
-        topPanel.add(scrollPane, BorderLayout.CENTER);
-        topPanel.setPreferredSize(new Dimension(550, 175));
-        myPanelLayout.putConstraint(SpringLayout.WEST, topPanel, 10, SpringLayout.WEST, this);
-        myPanelLayout.putConstraint(SpringLayout.NORTH, topPanel, 10, SpringLayout.NORTH, this);
+        JScrollPane scrollPane = new JScrollPane(questionTable);
+        scrollPane.setBackground(localGrey);
+        TitledBorder titledBorder = new TitledBorder(""); //
+        titledBorder = BorderFactory.createTitledBorder(titledBorder, "Survey Questions", TitledBorder.CENTER, TitledBorder.ABOVE_TOP);
+        titledBorder.setTitleColor(localBlue);
+        scrollPane.setBorder(titledBorder);
+
+        //scrollPane.add();
+
+        questionTablePanel.add(scrollPane, BorderLayout.CENTER);
+
+        questionFooterPanel = new JPanel();
+        questionTablePanel.add(questionFooterPanel, BorderLayout.SOUTH);
+        questionFooterPanel.setBackground(localGrey);
+        questionFooterPanel.setPreferredSize(new Dimension(550, 35));
+        SpringLayout questionFooterPanelLayout = new SpringLayout();
+        questionFooterPanel.setLayout(questionFooterPanelLayout);
+        LocateSortLabel(questionFooterPanel, questionFooterPanelLayout);
+        LocateSortButtons(questionFooterPanel, questionFooterPanelLayout);
+
     }
 
-    public void AnswerTable(SpringLayout myPanelLayout, SpringLayout springpanelLayout)
+    public void AnswerTable(SpringLayout parentLayout, SpringLayout thisLayout)
     {
-        // Create a panel to hold all other components
-        rightPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-        
-        rightPanel.setLayout(springpanelLayout);
-        add(rightPanel);
+        answerTablePanel = new JPanel();
+        answerTablePanel.setBackground(localGrey);
+        answerTablePanel.setBorder(BorderFactory.createLineBorder(localGreen));
+        answerTablePanel.setLayout(thisLayout);
+        basePanel.add(answerTablePanel);
 
-        
-            
         //Size and locate panel
-        rightPanel.setPreferredSize(new Dimension(230, 190));
-        myPanelLayout.putConstraint(SpringLayout.WEST, rightPanel, 600, SpringLayout.WEST, this);
-        myPanelLayout.putConstraint(SpringLayout.NORTH, rightPanel, 10, SpringLayout.NORTH, this);
-        
-    
+        answerTablePanel.setPreferredSize(new Dimension(375, 250));
+        parentLayout.putConstraint(SpringLayout.WEST, answerTablePanel, 600, SpringLayout.WEST, this);
+        parentLayout.putConstraint(SpringLayout.NORTH, answerTablePanel, 10, SpringLayout.NORTH, this);
     }
 
-    class MyModel extends AbstractTableModel
+    public void DisplayQuestion(int questionNumber)
     {
-        ArrayList<Object[]> al;
-
-        // the headers
-        String[] header;
-        
-        // to hold the column index for the Sent column
-        int col;
-
-        // constructor 
-        MyModel(ArrayList<Object[]> obj, String[] header)
-        {
-            // save the header
-            this.header = header;
-            // and the data
-            al = obj;
-            // get the column index for the Sent column
-            col = this.findColumn("Sent");
-        }
-
-        private MyModel(ArrayList<Object[]> dataValues) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        // method that needs to be overload. The row count is the size of the ArrayList
-
-        public int getRowCount()
-        {
-            return al.size();
-        }
-
-        // method that needs to be overload. The column count is the size of our header
-        public int getColumnCount()
-        {
-            return header.length;
-        }
-
-        // method that needs to be overload. The object is in the arrayList at rowIndex
-        public Object getValueAt(int rowIndex, int columnIndex)
-        {
-            return al.get(rowIndex)[columnIndex];
-        }
-
-        // a method to return the column name 
-        public String getColumnName(int index)
-        {
-            return header[index];
-        }
-        
-        public Class getColumnClass(int columnIndex) 
-        {
-            if (columnIndex == col) 
-            {
-                return Boolean.class; // For every cell in column 7, set its class to Boolean.class
-            }
-            return super.getColumnClass(columnIndex); // Otherwise, set it to the default class
-	}
-
-        // a method to add a new line to the table
-        void add(String word1, String word2, boolean sent)
-        {
-            // make it an array[3] as this is the way it is stored in the ArrayList
-            // (not best design but we want simplicity)
-            Object[] item = new Object[3];
-            item[0] = word1;
-            item[1] = word2;
-            item[2] = sent;
-            al.add(item);
-            // inform the GUI that I have change
-            fireTableDataChanged();
-        }
-
-        private void add(String text, String text0) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
+        txtTopic.setText(questionModel.getValueAt(questionNumber, 1));
+        txtQn.setText(questionModel.getValueAt(questionNumber, 2));
+        txtA.setText(questionModel.getValueAt(questionNumber, 3));
+        txtB.setText(questionModel.getValueAt(questionNumber, 4));
+        txtC.setText(questionModel.getValueAt(questionNumber, 5));
+        txtD.setText(questionModel.getValueAt(questionNumber, 6));
+        txtE.setText(questionModel.getValueAt(questionNumber, 7));
     }
+
 
 //<editor-fold defaultstate="collapsed" desc="Listeners">
     
@@ -387,10 +353,11 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
 
     public void actionPerformed(ActionEvent e)
     {
+        System.out.println(e.getSource());
         if(e.getSource() == btnAdd)
         {
-            wordModel.add(txtWord1.getText(),txtWord2.getText());
-            table.repaint();
+            questionModel.add(txtWord1.getText(),txtWord2.getText());
+            questionTable.repaint();
         }
     }
 
