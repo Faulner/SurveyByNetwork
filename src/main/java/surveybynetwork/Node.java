@@ -3,20 +3,20 @@ package surveybynetwork;
 public class Node {             // class for nodes in a doubly-linked list
     Node prev;                  // previous Node in a doubly-linked list
     Node next;                  // next Node in a doubly-linked list
-    SurveyResult mySurveyResult;// data stored in this Node
+    SurveyResult surveyResult;// data stored in this Node
     Node() {                    // constructor for head Node
         prev= this;             // of an empty doubly-linked list
         next = this;
-        mySurveyResult = new SurveyResult();
+        surveyResult = new SurveyResult();
     }
 
     Node(String topic, String number, String average) {       // constructor for a Node with data
         prev= null;
         next = null;
-        mySurveyResult = new SurveyResult();
-        mySurveyResult.setTopic(topic);
-        mySurveyResult.setNumber(number);
-        mySurveyResult.setNumber(average);
+        surveyResult = new SurveyResult();
+        surveyResult.setTopic(topic);
+        surveyResult.setNumber(number);
+        surveyResult.setNumber(average);
     }
 
     public void append(Node newNode) {  // attach newNode after this Node
@@ -40,6 +40,6 @@ public class Node {             // class for nodes in a doubly-linked list
 
     public String print()
     {
-        return mySurveyResult.print();
+        return surveyResult.print();
     }
 }

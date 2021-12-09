@@ -47,7 +47,7 @@ public class SurveyResult {
         this.Number = Number;
     }
 
-    public void setQuestion(String Average)
+    public void setAverage(String Average)
     {
         this.Average = Average;
     }

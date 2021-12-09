@@ -9,13 +9,8 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.InputStreamReader;
-import java.util.Scanner;
 
 
 public class SurveyByNetwork extends JFrame implements WindowListener, ActionListener
@@ -24,9 +19,10 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
 //<editor-fold defaultstate="collapsed" desc="Declarations, main and Constructor">
 
     // network bits
-    ChatServer server;
+    SurveyServer server;
 
     // ui elements
+    ArrayList<String> surveyResponses = new ArrayList();
     ArrayList<SurveyRecord> surveyRecords = new ArrayList();
     Color localGreen = Color.decode("#267F00");
     Color localYellow = Color.decode("#FFFEEB");
@@ -34,12 +30,12 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     Color localBlue = Color.decode("#1F497D");
     Color localEcruWhite = Color.decode("#F7F9F1");
     Dimension frameSize = new Dimension(1000, 700);
+    DList responseDList = new DList();
     JButton btnSortByNumber, btnSortByTopic, btnSortByQuestion, btnExit, btnSend, btnDisplayBinaryTree,
             btnPreOrderDisplay, btnInOrderDisplay, btnPostOrderDisplay, btnPreOrderSave, btnInOrderSave, btnPostOrderSave;
     JLabel lblTopic, lblQn, lblA, lblB, lblC, lblD, lblE, lblSort, lblCorrectAnswer, lblLinkedList, lblBinaryTree,
             lblPreOrder, lblInOrder, lblPostOrder;
-    JTextArea txtWord1, txtWord2, txtTopic, txtQn, txtA, txtB, txtC, txtD, txtE, txtCorrectAnswer, txtLinkedList,
-            txtBinaryTree;
+    JTextArea txtTopic, txtQn, txtA, txtB, txtC, txtD, txtE, txtCorrectAnswer, txtLinkedList, txtBinaryTree;
     JPanel basePanel, questionTablePanel, questionFooterPanel, answerTablePanel, sendPanel, displayPanel;
     JTable questionTable;
     QuestionModel questionModel;
@@ -68,7 +64,7 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
 
         this.addWindowListener(this);
 
-        server = new ChatServer(4444);
+        server = new SurveyServer(4444, this);
     }
 
 //</editor-fold>
@@ -542,7 +538,53 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         txtC.setText(questionModel.getValueAt(questionNumber, 5));
         txtD.setText(questionModel.getValueAt(questionNumber, 6));
         txtE.setText(questionModel.getValueAt(questionNumber, 7));
+        surveyResponses.clear();
+        txtCorrectAnswer.setText("");
     }
+
+    public void sendSurvey()
+    {
+        int row = questionTable.getSelectedRow();
+        String correctAnswer = txtCorrectAnswer.getText();
+        if(row > -1 && correctAnswer.length() > 0) {
+            String survey = "";
+            for(int i = 0; i < 8; i++) {
+                survey += questionModel.getValueAt(row, i) + "~~~~~";
+            }
+            survey += correctAnswer;
+            server.broadcastSurvey(survey);
+        } else {
+            JOptionPane.showMessageDialog(null,"Please select a question and supply an answer");
+        }
+    }
+
+    public void processSurveyResponse(String response)
+    {
+        surveyResponses.add(response);
+        int responseTotal = 0;
+        for(int i = 0; i < surveyResponses.size(); i++) {
+            int r = Integer.parseInt(surveyResponses.get(i));
+            responseTotal += r;
+        }
+        double average = (double)responseTotal/surveyResponses.size();
+        String questionAverage = String.format("%.1f", average);
+
+        int row = questionTable.getSelectedRow();
+        String questionNumber = questionModel.getValueAt(row, 0);
+        String questionTopic = questionModel.getValueAt(row, 1);
+
+        Node match = responseDList.find("Qn " + questionNumber);
+        if(match == null) {
+            Node head = responseDList.head;
+            Node node = new Node(questionTopic, questionNumber, questionAverage);
+            head.append(node);
+            txtLinkedList.setText(responseDList.print());
+        } else {
+            match.surveyResult.setAverage(questionAverage);
+            txtLinkedList.setText(responseDList.print());
+        }
+    }
+
 
 
 //<editor-fold defaultstate="collapsed" desc="Listeners">
@@ -554,7 +596,7 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     public void actionPerformed(ActionEvent e)
     {
         //System.out.println(e.getSource());
-        //, btnExit, btnSend, btnDisplayBinaryTree,
+        //, btnDisplayBinaryTree,
         //btnPreOrderDisplay, btnInOrderDisplay, btnPostOrderDisplay, btnPreOrderSave, btnInOrderSave, btnPostOrderSave;
 
         if(e.getSource() == btnSortByNumber)
@@ -567,6 +609,10 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         } else if (e.getSource() == btnSortByQuestion) {
             exchangeSortQuestion(surveyRecords);
             questionTable.repaint();
+        } else if (e.getSource() == btnSend) {
+            sendSurvey();
+        } else if(e.getSource() == btnExit) {
+            System.exit(0);
         }
     }
 

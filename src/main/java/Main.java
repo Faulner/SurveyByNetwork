@@ -11,11 +11,18 @@ public class Main
         questionFrame.setResizable(true);
         questionFrame.setVisible(true);
 
-        SurveyQuestions answerFrame = new SurveyQuestions();
-        answerFrame.setSize(answerFrame.getFrameSize());
-        answerFrame.setLocation(400, 200);
-        answerFrame.setResizable(true);
-        answerFrame.setVisible(true);
+        SurveyQuestions answerFrame1 = new SurveyQuestions();
+        answerFrame1.setSize(answerFrame1.getFrameSize());
+        answerFrame1.setLocation(150, 150);
+        answerFrame1.setResizable(true);
+        answerFrame1.setVisible(true);
+
+        SurveyQuestions answerFrame2 = new SurveyQuestions();
+        answerFrame2.setSize(answerFrame2.getFrameSize());
+        answerFrame2.setLocation(250, 250);
+        answerFrame2.setResizable(true);
+        answerFrame2.setVisible(true);
+
     }
 
 

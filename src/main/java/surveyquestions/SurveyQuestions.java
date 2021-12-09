@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 
 public class SurveyQuestions extends JFrame implements WindowListener, ActionListener
 {
@@ -26,7 +27,7 @@ public class SurveyQuestions extends JFrame implements WindowListener, ActionLis
     Color localGrey = Color.decode("#EFF2F7");
     Color localBlue = Color.decode("#1F497D");
     Color localEcruWhite = Color.decode("#F7F9F1");
-    Dimension frameSize = new Dimension(500, 350);
+    Dimension frameSize = new Dimension(395, 405);
     JButton btnExit, btnSubmit;
     JLabel lblTopic, lblQn, lblA, lblB, lblC, lblD, lblE, lblSort, lblAnswer;
     JTextArea txtTopic, txtQn, txtA, txtB, txtC, txtD, txtE, txtAnswer;
@@ -53,6 +54,7 @@ public class SurveyQuestions extends JFrame implements WindowListener, ActionLis
 
         //CHAT RELATED ---------------------------
         getParameters();
+        connect(serverName, serverPort);
         //----------------------------------------
     }
 
@@ -97,11 +99,11 @@ public class SurveyQuestions extends JFrame implements WindowListener, ActionLis
     {
         lblTopic = locateALabel(parentPanel, parentLayout, lblTopic, "Topic:", 15,15);
         lblQn = locateALabel(parentPanel, parentLayout, lblQn, "Qn:", 15,40);
-        lblA = locateALabel(parentPanel, parentLayout, lblA, "A:", 15,115);
-        lblB = locateALabel(parentPanel, parentLayout, lblB, "B:", 15,140);
-        lblC = locateALabel(parentPanel, parentLayout, lblC, "C:", 15,165);
-        lblD = locateALabel(parentPanel, parentLayout, lblD, "D:", 15,190);
-        lblE = locateALabel(parentPanel, parentLayout, lblE, "E:", 15,215);
+        lblA = locateALabel(parentPanel, parentLayout, lblA, "1:", 15,115);
+        lblB = locateALabel(parentPanel, parentLayout, lblB, "2:", 15,140);
+        lblC = locateALabel(parentPanel, parentLayout, lblC, "3:", 15,165);
+        lblD = locateALabel(parentPanel, parentLayout, lblD, "4:", 15,190);
+        lblE = locateALabel(parentPanel, parentLayout, lblE, "5:", 15,215);
     }
 
     public JTextArea locateATextArea(JPanel parentPanel, SpringLayout parentLayout, JTextArea myTextArea, int x, int y, int w, int h)
@@ -139,44 +141,48 @@ public class SurveyQuestions extends JFrame implements WindowListener, ActionLis
 
 
         submitPanel.setBackground(localYellow);
-        submitPanel.setPreferredSize(new Dimension(465, 45));
+        submitPanel.setPreferredSize(new Dimension(465, 50));
         SpringLayout sendPanelLayout = new SpringLayout();
         submitPanel.setLayout(sendPanelLayout);
-
-        btnExit = new JButton("Exit");
-        btnExit.setMnemonic(KeyEvent.VK_E);
-        btnExit.addActionListener(this);
-        sendPanelLayout.putConstraint(SpringLayout.WEST, btnExit, 0, SpringLayout.WEST, submitPanel);
-        sendPanelLayout.putConstraint(SpringLayout.NORTH, btnExit, 10, SpringLayout.NORTH, submitPanel);
-        btnExit.setPreferredSize(new Dimension(150,25));
-        submitPanel.add(btnExit);
 
         btnSubmit = new JButton("Submit");
         btnSubmit.setMnemonic(KeyEvent.VK_S);
         btnSubmit.addActionListener(this);
-        sendPanelLayout.putConstraint(SpringLayout.EAST, btnSubmit, 0, SpringLayout.EAST, submitPanel);
-        sendPanelLayout.putConstraint(SpringLayout.NORTH, btnSubmit, 10, SpringLayout.NORTH, submitPanel);
-        btnSubmit.setPreferredSize(new Dimension(250,25));
+        sendPanelLayout.putConstraint(SpringLayout.WEST, btnSubmit, 5, SpringLayout.WEST, submitPanel);
+        sendPanelLayout.putConstraint(SpringLayout.SOUTH, btnSubmit, 0, SpringLayout.SOUTH, submitPanel);
+        btnSubmit.setPreferredSize(new Dimension(100,25));
         submitPanel.add(btnSubmit);
 
-        txtAnswer = new JTextArea(1, 25);
+        btnExit = new JButton("Exit");
+        btnExit.setMnemonic(KeyEvent.VK_E);
+        btnExit.addActionListener(this);
+        sendPanelLayout.putConstraint(SpringLayout.EAST, btnExit, -95, SpringLayout.EAST, submitPanel);
+        sendPanelLayout.putConstraint(SpringLayout.SOUTH, btnExit, 0, SpringLayout.SOUTH, submitPanel);
+        btnExit.setPreferredSize(new Dimension(100,25));
+        submitPanel.add(btnExit);
+
+        txtAnswer = new JTextArea(1, 3);
         submitPanel.add(txtAnswer);
-        sendPanelLayout.putConstraint(SpringLayout.EAST, txtAnswer, -5, SpringLayout.WEST, submitPanel);
-        sendPanelLayout.putConstraint(SpringLayout.NORTH, txtAnswer, 14, SpringLayout.NORTH, submitPanel);
+        sendPanelLayout.putConstraint(SpringLayout.EAST, txtAnswer, -325, SpringLayout.EAST, submitPanel);
+        sendPanelLayout.putConstraint(SpringLayout.SOUTH, txtAnswer, -30, SpringLayout.SOUTH, submitPanel);
         txtAnswer.setBorder(BorderFactory.createLineBorder(Color.black));
 
         lblAnswer = new JLabel("Your Answer:");
         lblAnswer.setForeground(localBlue);
         submitPanel.add(lblAnswer);
-        sendPanelLayout.putConstraint(SpringLayout.EAST, lblAnswer, -5, SpringLayout.WEST, txtAnswer);
-        sendPanelLayout.putConstraint(SpringLayout.NORTH, lblAnswer, 14, SpringLayout.NORTH, submitPanel);
+        sendPanelLayout.putConstraint(SpringLayout.WEST, lblAnswer, 5, SpringLayout.WEST, submitPanel);
+        sendPanelLayout.putConstraint(SpringLayout.SOUTH, lblAnswer, -30, SpringLayout.SOUTH, submitPanel);
     }
 
     public void renderAnswerPanel(SpringLayout parentLayout)
     {
         answerPanel = new JPanel();
         answerPanel.setBackground(localEcruWhite);
-        answerPanel.setBorder(BorderFactory.createLineBorder(localGreen));
+
+        TitledBorder titledBorder = new TitledBorder(""); //
+        titledBorder = BorderFactory.createTitledBorder(titledBorder, "Enter your answer and click Submit", TitledBorder.LEFT, TitledBorder.ABOVE_TOP);
+        titledBorder.setTitleColor(localBlue);
+        answerPanel.setBorder(titledBorder);
 
         SpringLayout answerTableLayout = new SpringLayout();
         answerPanel.setLayout(answerTableLayout);
@@ -186,9 +192,9 @@ public class SurveyQuestions extends JFrame implements WindowListener, ActionLis
         locateAnswerPanelLabels(answerPanel, answerTableLayout);
 
         //Size and locate panel
-        answerPanel.setPreferredSize(new Dimension(375, 250));
+        answerPanel.setPreferredSize(new Dimension(375, 275));
         parentLayout.putConstraint(SpringLayout.WEST, answerPanel, 10, SpringLayout.WEST, this);
-        parentLayout.putConstraint(SpringLayout.NORTH, answerPanel, 35, SpringLayout.NORTH, this);
+        parentLayout.putConstraint(SpringLayout.NORTH, answerPanel, 15, SpringLayout.NORTH, this);
     }
 
     public void renderBase(SpringLayout baseLayout)
@@ -199,17 +205,6 @@ public class SurveyQuestions extends JFrame implements WindowListener, ActionLis
         basePanel.setPreferredSize(getFrameSize());
         this.add(basePanel);
         setBackground(localYellow);
-    }
-
-    public void displayQuestion(String[] question)
-    {
-        txtTopic.setText(question[0]);
-        txtQn.setText(question[1]);
-        txtA.setText(question[2]);
-        txtB.setText(question[3]);
-        txtC.setText(question[4]);
-        txtD.setText(question[5]);
-        txtE.setText(question[6]);
     }
 
     public void getParameters()
@@ -227,15 +222,13 @@ public class SurveyQuestions extends JFrame implements WindowListener, ActionLis
 
     public void actionPerformed(ActionEvent e)
     {
-        //System.out.println(e.getSource());
-        //, btnExit, btnSend, btnDisplayBinaryTree,
-        //btnPreOrderDisplay, btnInOrderDisplay, btnPostOrderDisplay, btnPreOrderSave, btnInOrderSave, btnPostOrderSave;
-
         if(e.getSource() == btnExit)
         {
-            //
+            txtAnswer.setText(".bye");
+            send();
+            this.hide();
         } else if (e.getSource() == btnSubmit) {
-            //
+            send();
         }
     }
 
@@ -322,8 +315,17 @@ public class SurveyQuestions extends JFrame implements WindowListener, ActionLis
 
     void println(String msg)
     {
-        //display.appendText(msg + "\n");
-        txtTopic.setText(msg);
+        if(msg.contains("~~~~~")) {
+            String[] arr = msg.split("~~~~~");
+
+            txtTopic.setText(arr[1]);
+            txtQn.setText(arr[2]);
+            txtA.setText(arr[3]);
+            txtB.setText(arr[4]);
+            txtC.setText(arr[5]);
+            txtD.setText(arr[6]);
+            txtE.setText(arr[7]);
+        }
     }
 
     public void windowOpened(WindowEvent e)  {  }

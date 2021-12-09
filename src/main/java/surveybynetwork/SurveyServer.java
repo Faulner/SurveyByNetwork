@@ -7,22 +7,23 @@ package surveybynetwork;
 import java.net.*;
 import java.io.*;
 
-public class ChatServer implements Runnable
+public class SurveyServer implements Runnable
 {
-
-    private ChatServerThread clients[] = new ChatServerThread[50];
+    private SurveyByNetwork surveyor;
+    private SurveyServerThread clients[] = new SurveyServerThread[50];
     private ServerSocket server = null;
     private Thread thread = null;
     private int clientCount = 0;
 
 
-    public ChatServer(int port)
+    public SurveyServer(int port, SurveyByNetwork surveyor)
     {
         try
         {
             System.out.println("Binding to port " + port + ", please wait  ...");
             server = new ServerSocket(port);
             System.out.println("Server started: " + server);
+            this.surveyor = surveyor;
             start();
         }
         catch (IOException ioe)
@@ -78,6 +79,14 @@ public class ChatServer implements Runnable
         return -1;
     }
 
+    public synchronized void broadcastSurvey(String input)
+    {
+        for (int i = 0; i < clientCount; i++)
+        {
+            clients[i].send(input);
+        }
+    }
+
     public synchronized void handle(int ID, String input)
     {
         if (input.equals(".bye"))
@@ -89,8 +98,8 @@ public class ChatServer implements Runnable
         {
             for (int i = 0; i < clientCount; i++)
             {
-                //if(clients[i].getID() != ID)
-                clients[i].send(ID + ": " + input);
+                //clients[i].send(ID + ": " + input);
+                surveyor.processSurveyResponse(input);
             }
         }
     }
@@ -100,7 +109,7 @@ public class ChatServer implements Runnable
         int pos = findClient(ID);
         if (pos >= 0)
         {
-            ChatServerThread toTerminate = clients[pos];
+            SurveyServerThread toTerminate = clients[pos];
             System.out.println("Removing client thread " + ID + " at " + pos);
             if (pos < clientCount - 1)
             {
@@ -127,7 +136,7 @@ public class ChatServer implements Runnable
         if (clientCount < clients.length)
         {
             System.out.println("Client accepted: " + socket);
-            clients[clientCount] = new ChatServerThread(this, socket);
+            clients[clientCount] = new SurveyServerThread(this, socket);
             try
             {
                 clients[clientCount].open();
