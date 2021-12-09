@@ -1,11 +1,7 @@
 package surveybynetwork;
 
-
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.util.ArrayList;
@@ -27,21 +23,22 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     
 //<editor-fold defaultstate="collapsed" desc="Declarations, main and Constructor">
 
-    JLabel lblWord1, lblWord2, lblSent, lblTopic, lblQn, lblA, lblB, lblC, lblD, lblE, lblSort;
-    JTextArea txtWord1, txtWord2, txtTopic, txtQn, txtA, txtB, txtC, txtD, txtE;
-    JButton btnAdd;
-    JButton btnSortByNumber;
-    JButton btnSortByTopic;
-    JButton btnSortByQuestion;
     ArrayList<SurveyRecord> surveyRecords = new ArrayList();
-    JPanel basePanel, questionTablePanel, questionFooterPanel, answerTablePanel;
-    JTable questionTable;
-    QuestionModel questionModel;
-    Dimension frameSize = new Dimension(1000, 700);
     Color localGreen = Color.decode("#267F00");
     Color localYellow = Color.decode("#FFFEEB");
     Color localGrey = Color.decode("#EFF2F7");
     Color localBlue = Color.decode("#1F497D");
+    Color localEcruWhite = Color.decode("#F7F9F1");
+    Dimension frameSize = new Dimension(1000, 700);
+    JButton btnSortByNumber, btnSortByTopic, btnSortByQuestion, btnExit, btnSend, btnDisplayBinaryTree,
+            btnPreOrderDisplay, btnInOrderDisplay, btnPostOrderDisplay, btnPreOrderSave, btnInOrderSave, btnPostOrderSave;
+    JLabel lblTopic, lblQn, lblA, lblB, lblC, lblD, lblE, lblSort, lblCorrectAnswer, lblLinkedList, lblBinaryTree,
+            lblPreOrder, lblInOrder, lblPostOrder;
+    JTextArea txtWord1, txtWord2, txtTopic, txtQn, txtA, txtB, txtC, txtD, txtE, txtCorrectAnswer, txtLinkedList,
+            txtBinaryTree;
+    JPanel basePanel, questionTablePanel, questionFooterPanel, answerTablePanel, sendPanel, displayPanel;
+    JTable questionTable;
+    QuestionModel questionModel;
 
 
     public static void main(String[] args)
@@ -65,28 +62,15 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         setLayout(appLayout);
 
         SpringLayout baseLayout = new SpringLayout();
-        basePanel = new JPanel();
-        basePanel.setLayout(baseLayout);
-        basePanel.setBackground(localYellow);
-        basePanel.setPreferredSize(getFrameSize());
-        this.add(basePanel);
-        //setBackground(Color.yellow);
-        setBackground(localYellow);
 
-        SpringLayout answerTableLayout = new SpringLayout();
-        AnswerTable(baseLayout, answerTableLayout);
-                
-        LocateLabels(baseLayout);
-        LocateTextAreas(baseLayout);
-        LocateButtons(baseLayout);
-        LocateAnswerPanelTextAreas(answerTableLayout);
-        LocateAnswerPanelLabels(answerTablePanel, answerTableLayout);
         readFile("SurveyByNetwork_SurveyQuestions.txt");
-        
-        
-        QuestionTable(baseLayout);
-        
-        
+
+        renderBase(baseLayout);
+        renderAnswerTable(baseLayout);
+        renderQuestionTable(baseLayout);
+        renderSendPanel(baseLayout);
+        renderDisplayPanel(baseLayout);
+
         this.addWindowListener(this);
     }
 
@@ -99,14 +83,7 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     //  Set up GUI Components
     //---------------------------------------------------------------------------------------------------
 
-    public void LocateLabels(SpringLayout myLabelLayout)
-    {
-        //lblWord1  = LocateALabel(myLabelLayout, lblWord1, "Word 1:", 650, 500);
-        //lblWord2 = LocateALabel(myLabelLayout, lblWord2, "Word 2:", 650, 650);
-        //lblSent = LocateALabel(myLabelLayout, lblSent, "Sent:", 650, 750);
-    }
-
-    public JLabel LocateALabel(JPanel parentPanel, SpringLayout parentLayout, JLabel myLabel, String  LabelCaption, int x, int y)
+    public JLabel locateALabel(JPanel parentPanel, SpringLayout parentLayout, JLabel myLabel, String  LabelCaption, int x, int y)
     {
         myLabel = new JLabel(LabelCaption);
         myLabel.setForeground(localBlue);
@@ -115,54 +92,44 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         parentLayout.putConstraint(SpringLayout.NORTH, myLabel, y, SpringLayout.NORTH, this);
         return myLabel;
     }
-   
-    public void LocateTextAreas(SpringLayout myTextAreaLayout)
+
+    public void locateSortButtons(JPanel panel, SpringLayout myButtonLayout)
     {
-        //txtWord1  = LocateATextArea(myTextAreaLayout, txtWord1, 100, 200, 1, 10);
-        //txtWord2 = LocateATextArea(myTextAreaLayout, txtWord2, 100, 200, 1, 10);
+        btnSortByNumber = locateSortButton(panel, myButtonLayout, btnSortByNumber, "Qn #", 235, -25, 100, 25);
+        btnSortByTopic = locateSortButton(panel, myButtonLayout, btnSortByTopic, "Topic", 335, -25, 100, 25);
+        btnSortByQuestion = locateSortButton(panel, myButtonLayout, btnSortByQuestion, "Answer", 435, -25, 100, 25);
     }
 
-    public void LocateButtons(SpringLayout myButtonLayout)
+    public void locateSortLabel(JPanel panel, SpringLayout myButtonLayout)
     {
-        //btnAdd = LocateAButton(myButtonLayout, btnAdd, "Add", 700, 500, 80, 25);
-    }
-
-    public void LocateSortButtons(JPanel panel, SpringLayout myButtonLayout)
-    {
-        btnSortByNumber = LocateSortButton(panel, myButtonLayout, btnSortByNumber, "Qn #", 235, -25, 100, 25);
-        btnSortByTopic = LocateSortButton(panel, myButtonLayout, btnSortByTopic, "Topic", 335, -25, 100, 25);
-        btnSortByQuestion = LocateSortButton(panel, myButtonLayout, btnSortByQuestion, "Answer", 435, -25, 100, 25);
-    }
-
-    public void LocateSortLabel(JPanel panel, SpringLayout myButtonLayout)
-    {
-        lblSort = LocateALabel(panel, myButtonLayout, lblSort, "Sort by:", 175,10);
+        lblSort = locateALabel(panel, myButtonLayout, lblSort, "Sort by:", 175,10);
     }
     
-    public void LocateAnswerPanelTextAreas(SpringLayout myTextAreaLayout)
+    public void locateAnswerPanelTextAreas(SpringLayout myTextAreaLayout)
     {
-        txtTopic = LocateATextArea(answerTablePanel, myTextAreaLayout, txtTopic, 75, 15, 1, 25 );
-        txtQn = LocateATextArea(answerTablePanel, myTextAreaLayout, txtQn, 75, 40, 4, 25 );
+        txtTopic = locateATextArea(answerTablePanel, myTextAreaLayout, txtTopic, 75, 15, 1, 25 );
+        txtQn = locateATextArea(answerTablePanel, myTextAreaLayout, txtQn, 75, 40, 4, 25 );
         txtQn.setLineWrap(true);
-        txtA = LocateATextArea(answerTablePanel, myTextAreaLayout, txtA, 75, 115, 1, 25 );
-        txtB = LocateATextArea(answerTablePanel, myTextAreaLayout, txtB, 75, 140, 1, 25 );
-        txtC = LocateATextArea(answerTablePanel, myTextAreaLayout, txtC, 75, 165, 1, 25 );
-        txtD = LocateATextArea(answerTablePanel, myTextAreaLayout, txtD, 75, 190, 1, 25 );
-        txtE = LocateATextArea(answerTablePanel, myTextAreaLayout, txtE, 75, 215, 1, 25 );
+        txtQn.setWrapStyleWord(true);
+        txtA = locateATextArea(answerTablePanel, myTextAreaLayout, txtA, 75, 115, 1, 25 );
+        txtB = locateATextArea(answerTablePanel, myTextAreaLayout, txtB, 75, 140, 1, 25 );
+        txtC = locateATextArea(answerTablePanel, myTextAreaLayout, txtC, 75, 165, 1, 25 );
+        txtD = locateATextArea(answerTablePanel, myTextAreaLayout, txtD, 75, 190, 1, 25 );
+        txtE = locateATextArea(answerTablePanel, myTextAreaLayout, txtE, 75, 215, 1, 25 );
     }
     
-    public void LocateAnswerPanelLabels(JPanel parentPanel, SpringLayout parentLayout)
+    public void locateAnswerPanelLabels(JPanel parentPanel, SpringLayout parentLayout)
     {
-        lblTopic = LocateALabel(parentPanel, parentLayout, lblTopic, "Topic:", 15,15);
-        lblQn = LocateALabel(parentPanel, parentLayout, lblQn, "Qn:", 15,40);
-        lblA = LocateALabel(parentPanel, parentLayout, lblA, "A:", 15,115);
-        lblB = LocateALabel(parentPanel, parentLayout, lblB, "B:", 15,140);
-        lblC = LocateALabel(parentPanel, parentLayout, lblC, "C:", 15,165);
-        lblD = LocateALabel(parentPanel, parentLayout, lblD, "D:", 15,190);
-        lblE = LocateALabel(parentPanel, parentLayout, lblE, "E:", 15,215);
+        lblTopic = locateALabel(parentPanel, parentLayout, lblTopic, "Topic:", 15,15);
+        lblQn = locateALabel(parentPanel, parentLayout, lblQn, "Qn:", 15,40);
+        lblA = locateALabel(parentPanel, parentLayout, lblA, "A:", 15,115);
+        lblB = locateALabel(parentPanel, parentLayout, lblB, "B:", 15,140);
+        lblC = locateALabel(parentPanel, parentLayout, lblC, "C:", 15,165);
+        lblD = locateALabel(parentPanel, parentLayout, lblD, "D:", 15,190);
+        lblE = locateALabel(parentPanel, parentLayout, lblE, "E:", 15,215);
     }
 
-    public JTextArea LocateATextArea(JPanel parentPanel, SpringLayout parentLayout, JTextArea myTextArea, int x, int y, int w, int h)
+    public JTextArea locateATextArea(JPanel parentPanel, SpringLayout parentLayout, JTextArea myTextArea, int x, int y, int w, int h)
     {    
         myTextArea = new JTextArea(w,h);
         parentPanel.add(myTextArea);
@@ -172,7 +139,7 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         return myTextArea;
     }
 
-    public JButton LocateAButton(SpringLayout myButtonLayout, JButton myButton, String  ButtonCaption, int x, int y, int w, int h)
+    public JButton locateAButton(SpringLayout myButtonLayout, JButton myButton, String  ButtonCaption, int x, int y, int w, int h)
     {    
         myButton = new JButton(ButtonCaption);
         basePanel.add(myButton);
@@ -183,7 +150,7 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         return myButton;
     }
 
-    public JButton LocateSortButton(JPanel panel, SpringLayout myButtonLayout, JButton myButton, String  ButtonCaption, int x, int y, int w, int h)
+    public JButton locateSortButton(JPanel panel, SpringLayout myButtonLayout, JButton myButton, String  ButtonCaption, int x, int y, int w, int h)
     {
         myButton = new JButton(ButtonCaption);
         myButton.addActionListener(this);
@@ -197,10 +164,24 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     
 
 //</editor-fold>
-    
-   
-    
-     public void readFile(String fileName)
+
+    public static void bubbleSort(ArrayList<SurveyRecord> arr)
+    {
+        for(int j=0; j<arr.size(); j++)
+        {
+            for(int i=j+1; i<arr.size(); i++)
+            {
+                if((arr.get(i)).toString().compareToIgnoreCase(arr.get(j).toString())<0)
+                {
+                    SurveyRecord surveyRecord = arr.get(j);
+                    arr.set(j, arr.get(i));
+                    arr.set(i, surveyRecord);
+                }
+            }
+        }
+    }
+
+    public void readFile(String fileName)
     {
         // Try to read in the data and if an exception occurs go to the Catch section
         try
@@ -250,7 +231,179 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         }
     }
 
-    public void QuestionTable(SpringLayout parentLayout)
+    public void renderDisplayPanel(SpringLayout parentLayout)
+    {
+        // Create a panel to hold all other components
+        displayPanel = new JPanel();
+        parentLayout.putConstraint(SpringLayout.NORTH, displayPanel, 10, SpringLayout.SOUTH, sendPanel);
+        parentLayout.putConstraint(SpringLayout.WEST, displayPanel, 10, SpringLayout.WEST, this);
+        basePanel.add(displayPanel);
+
+        displayPanel.setBackground(localYellow);
+        displayPanel.setPreferredSize(new Dimension(965, 300));
+        SpringLayout displayPanelLayout = new SpringLayout();
+        displayPanel.setLayout(displayPanelLayout);
+
+        lblLinkedList = new JLabel("Linked List:");
+        lblLinkedList.setPreferredSize(new Dimension(961, 25));
+        lblLinkedList.setForeground(localBlue);
+        lblLinkedList.setOpaque(true);
+        lblLinkedList.setBackground(localEcruWhite);
+        displayPanel.add(lblLinkedList);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, lblLinkedList, 0, SpringLayout.WEST, displayPanel);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, lblLinkedList, 3, SpringLayout.NORTH, displayPanel);
+
+        txtLinkedList = new JTextArea(3, 87);
+        displayPanel.add(txtLinkedList);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, txtLinkedList, 0, SpringLayout.WEST, displayPanel);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, txtLinkedList, 0, SpringLayout.SOUTH, lblLinkedList);
+        txtLinkedList.setBorder(BorderFactory.createLineBorder(Color.black));
+
+        lblBinaryTree = new JLabel("Binary Tree:");
+        lblBinaryTree.setPreferredSize(new Dimension(840, 25));
+        lblBinaryTree.setForeground(localBlue);
+        lblBinaryTree.setOpaque(true);
+        lblBinaryTree.setBackground(localEcruWhite);
+        displayPanel.add(lblBinaryTree);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, lblBinaryTree, 0, SpringLayout.WEST, displayPanel);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, lblBinaryTree, 100, SpringLayout.NORTH, displayPanel);
+
+        txtBinaryTree = new JTextArea(3, 87);
+        displayPanel.add(txtBinaryTree);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, txtBinaryTree, 0, SpringLayout.WEST, displayPanel);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, txtBinaryTree, 0, SpringLayout.SOUTH, lblBinaryTree);
+        txtBinaryTree.setBorder(BorderFactory.createLineBorder(Color.black));
+
+        btnDisplayBinaryTree = new JButton("Display");
+        btnDisplayBinaryTree.addActionListener(this);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, btnDisplayBinaryTree, 0, SpringLayout.EAST, lblBinaryTree);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, btnDisplayBinaryTree, 100, SpringLayout.NORTH, displayPanel);
+        btnDisplayBinaryTree.setPreferredSize(new Dimension(120,25));
+        displayPanel.add(btnDisplayBinaryTree);
+
+        //, btnInOrderDisplay, btnPostOrderDisplay, , btnInOrderSave, btnPostOrderSave;
+        //, , lblPostOrder;
+        // pre-order
+        lblPreOrder = new JLabel("Pre-Order");
+        lblPreOrder.setPreferredSize(new Dimension(200, 25));
+        lblPreOrder.setForeground(Color.WHITE);
+        lblPreOrder.setHorizontalAlignment(SwingConstants.CENTER);
+        lblPreOrder.setOpaque(true);
+        lblPreOrder.setBackground(localBlue);
+        displayPanel.add(lblPreOrder);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, lblPreOrder, 30, SpringLayout.WEST, displayPanel);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, lblPreOrder, 200, SpringLayout.NORTH, displayPanel);
+
+        btnPreOrderDisplay = new JButton("Display");
+        btnPreOrderDisplay.addActionListener(this);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, btnPreOrderDisplay, 30, SpringLayout.WEST, displayPanel);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, btnPreOrderDisplay, 0, SpringLayout.SOUTH, lblPreOrder);
+        btnPreOrderDisplay.setPreferredSize(new Dimension(100,25));
+        displayPanel.add(btnPreOrderDisplay);
+
+        btnPreOrderSave = new JButton("Save");
+        btnPreOrderSave.addActionListener(this);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, btnPreOrderSave, 0, SpringLayout.EAST, btnPreOrderDisplay);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, btnPreOrderSave, 0, SpringLayout.SOUTH, lblPreOrder);
+        btnPreOrderSave.setPreferredSize(new Dimension(100,25));
+        displayPanel.add(btnPreOrderSave);
+
+        // in-order
+        lblInOrder = new JLabel("In-Order");
+        lblInOrder.setPreferredSize(new Dimension(200, 25));
+        lblInOrder.setForeground(Color.WHITE);
+        lblInOrder.setHorizontalAlignment(SwingConstants.CENTER);
+        lblInOrder.setOpaque(true);
+        lblInOrder.setBackground(localBlue);
+        displayPanel.add(lblInOrder);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, lblInOrder, 380, SpringLayout.WEST, displayPanel);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, lblInOrder, 200, SpringLayout.NORTH, displayPanel);
+
+        btnInOrderDisplay = new JButton("Display");
+        btnInOrderDisplay.addActionListener(this);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, btnInOrderDisplay, 380, SpringLayout.WEST, displayPanel);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, btnInOrderDisplay, 0, SpringLayout.SOUTH, lblInOrder);
+        btnInOrderDisplay.setPreferredSize(new Dimension(100,25));
+        displayPanel.add(btnInOrderDisplay);
+
+        btnInOrderSave = new JButton("Save");
+        btnInOrderSave.addActionListener(this);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, btnInOrderSave, 0, SpringLayout.EAST, btnInOrderDisplay);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, btnInOrderSave, 0, SpringLayout.SOUTH, lblInOrder);
+        btnInOrderSave.setPreferredSize(new Dimension(100,25));
+        displayPanel.add(btnInOrderSave);
+
+        // post-order
+        lblPostOrder = new JLabel("Post-Order");
+        lblPostOrder.setPreferredSize(new Dimension(200, 25));
+        lblPostOrder.setForeground(Color.WHITE);
+        lblPostOrder.setHorizontalAlignment(SwingConstants.CENTER);
+        lblPostOrder.setOpaque(true);
+        lblPostOrder.setBackground(localBlue);
+        displayPanel.add(lblPostOrder);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, lblPostOrder, 730, SpringLayout.WEST, displayPanel);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, lblPostOrder, 200, SpringLayout.NORTH, displayPanel);
+
+        btnPostOrderDisplay = new JButton("Display");
+        btnPostOrderDisplay.addActionListener(this);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, btnPostOrderDisplay, 730, SpringLayout.WEST, displayPanel);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, btnPostOrderDisplay, 0, SpringLayout.SOUTH, lblPostOrder);
+        btnPostOrderDisplay.setPreferredSize(new Dimension(100,25));
+        displayPanel.add(btnPostOrderDisplay);
+
+        btnPostOrderSave = new JButton("Save");
+        btnPostOrderSave.addActionListener(this);
+        displayPanelLayout.putConstraint(SpringLayout.WEST, btnPostOrderSave, 0, SpringLayout.EAST, btnPostOrderDisplay);
+        displayPanelLayout.putConstraint(SpringLayout.NORTH, btnPostOrderSave, 0, SpringLayout.SOUTH, lblPostOrder);
+        btnPostOrderSave.setPreferredSize(new Dimension(100,25));
+        displayPanel.add(btnPostOrderSave);
+    }
+
+
+    public void renderSendPanel(SpringLayout parentLayout)
+    {
+        // Create a panel to hold all other components
+        sendPanel = new JPanel();
+        parentLayout.putConstraint(SpringLayout.NORTH, sendPanel, 10, SpringLayout.SOUTH, questionTablePanel);
+        parentLayout.putConstraint(SpringLayout.WEST, sendPanel, 10, SpringLayout.WEST, this);
+        basePanel.add(sendPanel);
+
+
+        sendPanel.setBackground(localYellow);
+        sendPanel.setPreferredSize(new Dimension(965, 45));
+        SpringLayout sendPanelLayout = new SpringLayout();
+        sendPanel.setLayout(sendPanelLayout);
+
+        btnExit = new JButton("Exit");
+        btnExit.setMnemonic(KeyEvent.VK_E);
+        btnExit.addActionListener(this);
+        sendPanelLayout.putConstraint(SpringLayout.WEST, btnExit, 0, SpringLayout.WEST, sendPanel);
+        sendPanelLayout.putConstraint(SpringLayout.NORTH, btnExit, 10, SpringLayout.NORTH, sendPanel);
+        btnExit.setPreferredSize(new Dimension(250,25));
+        sendPanel.add(btnExit);
+
+        btnSend = new JButton("Send");
+        btnSend.setMnemonic(KeyEvent.VK_S);
+        btnSend.addActionListener(this);
+        sendPanelLayout.putConstraint(SpringLayout.EAST, btnSend, 0, SpringLayout.EAST, sendPanel);
+        sendPanelLayout.putConstraint(SpringLayout.NORTH, btnSend, 10, SpringLayout.NORTH, sendPanel);
+        btnSend.setPreferredSize(new Dimension(250,25));
+        sendPanel.add(btnSend);
+
+        txtCorrectAnswer = new JTextArea(1, 25);
+        sendPanel.add(txtCorrectAnswer);
+        sendPanelLayout.putConstraint(SpringLayout.EAST, txtCorrectAnswer, -5, SpringLayout.WEST, btnSend);
+        sendPanelLayout.putConstraint(SpringLayout.NORTH, txtCorrectAnswer, 14, SpringLayout.NORTH, sendPanel);
+        txtCorrectAnswer.setBorder(BorderFactory.createLineBorder(Color.black));
+
+        lblCorrectAnswer = new JLabel("Correct Answer:");
+        lblCorrectAnswer.setForeground(localBlue);
+        sendPanel.add(lblCorrectAnswer);
+        sendPanelLayout.putConstraint(SpringLayout.EAST, lblCorrectAnswer, -5, SpringLayout.WEST, txtCorrectAnswer);
+        sendPanelLayout.putConstraint(SpringLayout.NORTH, lblCorrectAnswer, 14, SpringLayout.NORTH, sendPanel);
+    }
+
+    public void renderQuestionTable(SpringLayout parentLayout)
     { 
         // Create a panel to hold all other components
         questionTablePanel = new JPanel();
@@ -277,7 +430,7 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         questionTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent event) {
                 if (questionTable.getSelectedRow() > -1) {
-                    DisplayQuestion(questionTable.getSelectedRow());
+                    displayQuestion(questionTable.getSelectedRow());
                 }
             }
         });
@@ -291,6 +444,8 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         questionTable.setRowSelectionAllowed(true);
         questionTable.setColumnSelectionAllowed(false);
         questionTable.getTableHeader().setForeground(localBlue);
+        questionTable.getTableHeader().setOpaque(false);
+        questionTable.getTableHeader().setBackground(localEcruWhite);
 
         // Change the text and background colours
         questionTable.setSelectionForeground(Color.white);
@@ -314,18 +469,23 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         questionFooterPanel.setPreferredSize(new Dimension(550, 35));
         SpringLayout questionFooterPanelLayout = new SpringLayout();
         questionFooterPanel.setLayout(questionFooterPanelLayout);
-        LocateSortLabel(questionFooterPanel, questionFooterPanelLayout);
-        LocateSortButtons(questionFooterPanel, questionFooterPanelLayout);
+        locateSortLabel(questionFooterPanel, questionFooterPanelLayout);
+        locateSortButtons(questionFooterPanel, questionFooterPanelLayout);
 
     }
 
-    public void AnswerTable(SpringLayout parentLayout, SpringLayout thisLayout)
+    public void renderAnswerTable(SpringLayout parentLayout)
     {
         answerTablePanel = new JPanel();
-        answerTablePanel.setBackground(localGrey);
+        answerTablePanel.setBackground(localEcruWhite);
         answerTablePanel.setBorder(BorderFactory.createLineBorder(localGreen));
-        answerTablePanel.setLayout(thisLayout);
+
+        SpringLayout answerTableLayout = new SpringLayout();
+        answerTablePanel.setLayout(answerTableLayout);
         basePanel.add(answerTablePanel);
+
+        locateAnswerPanelTextAreas(answerTableLayout);
+        locateAnswerPanelLabels(answerTablePanel, answerTableLayout);
 
         //Size and locate panel
         answerTablePanel.setPreferredSize(new Dimension(375, 250));
@@ -333,7 +493,17 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
         parentLayout.putConstraint(SpringLayout.NORTH, answerTablePanel, 10, SpringLayout.NORTH, this);
     }
 
-    public void DisplayQuestion(int questionNumber)
+    public void renderBase(SpringLayout baseLayout)
+    {
+        basePanel = new JPanel();
+        basePanel.setLayout(baseLayout);
+        basePanel.setBackground(localYellow);
+        basePanel.setPreferredSize(getFrameSize());
+        this.add(basePanel);
+        setBackground(localYellow);
+    }
+
+    public void displayQuestion(int questionNumber)
     {
         txtTopic.setText(questionModel.getValueAt(questionNumber, 1));
         txtQn.setText(questionModel.getValueAt(questionNumber, 2));
@@ -353,12 +523,22 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
 
     public void actionPerformed(ActionEvent e)
     {
-        System.out.println(e.getSource());
-        if(e.getSource() == btnAdd)
+        //System.out.println(e.getSource());
+        //, btnExit, btnSend, btnDisplayBinaryTree,
+        //btnPreOrderDisplay, btnInOrderDisplay, btnPostOrderDisplay, btnPreOrderSave, btnInOrderSave, btnPostOrderSave;
+
+        if(e.getSource() == btnSortByNumber)
         {
-            questionModel.add(txtWord1.getText(),txtWord2.getText());
+            //questionModel.add();
+            //questionTable.repaint();
+        } else if (e.getSource() == btnSortByTopic) {
+            bubbleSort(surveyRecords);
+            questionTable.repaint();
+        } else if (e.getSource() == btnSortByQuestion) {
+            bubbleSort(surveyRecords);
             questionTable.repaint();
         }
+
     }
 
     
