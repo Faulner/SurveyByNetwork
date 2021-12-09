@@ -1,17 +1,16 @@
 package surveybynetwork;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.util.ArrayList;
+import com.twitter.hashing.KeyHasher;
+import com.twitter.hashing.KeyHashers;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.util.ArrayList;
 
 public class SurveyByNetwork extends JFrame implements WindowListener, ActionListener, FocusListener
 {
@@ -247,6 +246,23 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
             System.err.println("Error Reading File: " + e.getMessage());
         }
     }
+
+    public void writeBinaryTreeToFile(String orderType)
+    {
+        try
+        {
+            String tree = questionTree.print(orderType);;
+            BufferedWriter outFile = new BufferedWriter(new FileWriter("BinaryTree" + orderType + ".txt"));
+            long hashed = KeyHashers.FNV1_32().hashKey(tree.getBytes());
+            outFile.write(String.valueOf(hashed));
+            outFile.close();
+        }
+        catch (Exception e)
+        {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
+
 
     public void renderDisplayPanel(SpringLayout parentLayout)
     {
@@ -613,6 +629,12 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
             txtBinaryTree.setText(questionTree.print("In"));
         } else if(e.getSource() == btnPreOrderDisplay) {
             txtBinaryTree.setText(questionTree.print("Pre"));
+        } else if(e.getSource() == btnPostOrderSave) {
+            writeBinaryTreeToFile("Post");
+        } else if(e.getSource() == btnInOrderSave) {
+            writeBinaryTreeToFile("In");
+        } else if(e.getSource() == btnPreOrderSave) {
+            writeBinaryTreeToFile("Pre");
         }
     }
 

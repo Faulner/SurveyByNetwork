@@ -10,4 +10,17 @@
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
     </properties>
+    <repositories>
+        <repository>
+            <id>mvn1</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+    </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>com.twitter</groupId>
+            <artifactId>util-hashing_3</artifactId>
+            <version>21.8.0</version>
+        </dependency>
+    </dependencies>
 </project>
