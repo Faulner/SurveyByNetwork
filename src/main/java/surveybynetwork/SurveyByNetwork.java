@@ -97,7 +97,7 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     {
         btnSortByNumber = locateSortButton(panel, myButtonLayout, btnSortByNumber, "Qn #", 235, -25, 100, 25);
         btnSortByTopic = locateSortButton(panel, myButtonLayout, btnSortByTopic, "Topic", 335, -25, 100, 25);
-        btnSortByQuestion = locateSortButton(panel, myButtonLayout, btnSortByQuestion, "Answer", 435, -25, 100, 25);
+        btnSortByQuestion = locateSortButton(panel, myButtonLayout, btnSortByQuestion, "Question", 435, -25, 100, 25);
     }
 
     public void locateSortLabel(JPanel panel, SpringLayout myButtonLayout)
@@ -165,19 +165,52 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
 
 //</editor-fold>
 
-    public static void bubbleSort(ArrayList<SurveyRecord> arr)
+    public static void bubbleSortTopic(ArrayList<SurveyRecord> arr)
     {
         for(int j=0; j<arr.size(); j++)
         {
             for(int i=j+1; i<arr.size(); i++)
             {
-                if((arr.get(i)).toString().compareToIgnoreCase(arr.get(j).toString())<0)
+                if((arr.get(i)).getTopic().compareToIgnoreCase(arr.get(j).getTopic())<0)
                 {
                     SurveyRecord surveyRecord = arr.get(j);
                     arr.set(j, arr.get(i));
                     arr.set(i, surveyRecord);
                 }
             }
+        }
+    }
+
+    public static void exchangeSortQuestion(ArrayList<SurveyRecord> arr)
+    {
+        int i, j;
+        SurveyRecord temp;  //be sure that the temp variable is the same "type" as the array
+        for (i = 0; i < arr.size() - 1; i++) {
+            for (j = i + 1; j < arr.size(); j++) {
+                if ((arr.get(i)).getQuestion().compareToIgnoreCase(arr.get(j).getQuestion())>0)         //sorting into descending order
+                {
+                    temp = arr.get(i);   //swapping
+                    arr.set(i, arr.get(j));
+                    arr.set(j, temp);
+                }
+            }
+        }
+    }
+
+    public static void insertionSortQuestionNumber(ArrayList<SurveyRecord> arr)
+    {
+        int j;              // the number of items sorted so far
+        SurveyRecord key;   // the item to be inserted
+        int i;
+
+        for(j=1; j<arr.size(); j++)    // Start with 1 (not 0)
+        {
+            key = arr.get(j);
+            for(i=j-1; (i>=0) && ((arr.get(i)).getNumber().compareToIgnoreCase(key.getNumber())>0); i--)   // Smaller values are moving up
+            {
+                arr.set(i+1, arr.get(i));
+            }
+            arr.set(i+1, key);    // Put the key in its proper location
         }
     }
 
@@ -529,16 +562,15 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
 
         if(e.getSource() == btnSortByNumber)
         {
-            //questionModel.add();
-            //questionTable.repaint();
+            insertionSortQuestionNumber(surveyRecords);
+            questionTable.repaint();
         } else if (e.getSource() == btnSortByTopic) {
-            bubbleSort(surveyRecords);
+            bubbleSortTopic(surveyRecords);
             questionTable.repaint();
         } else if (e.getSource() == btnSortByQuestion) {
-            bubbleSort(surveyRecords);
+            exchangeSortQuestion(surveyRecords);
             questionTable.repaint();
         }
-
     }
 
     
