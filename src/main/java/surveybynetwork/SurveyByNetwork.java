@@ -24,6 +24,7 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     // ui elements
     ArrayList<String> surveyResponses = new ArrayList();
     ArrayList<SurveyRecord> surveyRecords = new ArrayList();
+    BinaryTree questionTree = new BinaryTree();
     Color localGreen = Color.decode("#267F00");
     Color localYellow = Color.decode("#FFFEEB");
     Color localGrey = Color.decode("#EFF2F7");
@@ -543,6 +544,9 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
             }
             survey += correctAnswer;
             server.broadcastSurvey(survey);
+
+            questionTree.addNode(Integer.parseInt(questionModel.getValueAt(row, 0)), questionModel.getValueAt(row, 1));
+            txtBinaryTree.setText(questionTree.print("In"));
         } else {
             JOptionPane.showMessageDialog(null,"Please select a question and supply an answer");
         }
@@ -603,6 +607,12 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
             sendSurvey();
         } else if(e.getSource() == btnExit) {
             System.exit(0);
+        } else if(e.getSource() == btnPostOrderDisplay) {
+            txtBinaryTree.setText(questionTree.print("Post"));
+        } else if(e.getSource() == btnInOrderDisplay) {
+            txtBinaryTree.setText(questionTree.print("In"));
+        } else if(e.getSource() == btnPreOrderDisplay) {
+            txtBinaryTree.setText(questionTree.print("Pre"));
         }
     }
 
