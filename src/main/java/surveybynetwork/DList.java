@@ -18,9 +18,9 @@ public class DList {
         }
         String s = "HEAD ";
         for (Node current = head.next; current != head; current = current.next) {
-            s += " <-> " +current.print();
+            s += " <-> " + current.print();
         }
-        s = " <-> TAIL";
+        s += " <-> TAIL";
         return s;
     }
 }

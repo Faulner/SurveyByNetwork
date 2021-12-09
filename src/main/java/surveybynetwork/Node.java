@@ -16,7 +16,7 @@ public class Node {             // class for nodes in a doubly-linked list
         surveyResult = new SurveyResult();
         surveyResult.setTopic(topic);
         surveyResult.setNumber(number);
-        surveyResult.setNumber(average);
+        surveyResult.setAverage(average);
     }
 
     public void append(Node newNode) {  // attach newNode after this Node

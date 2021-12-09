@@ -13,7 +13,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
 
-public class SurveyByNetwork extends JFrame implements WindowListener, ActionListener
+public class SurveyByNetwork extends JFrame implements WindowListener, ActionListener, FocusListener
 {
     
 //<editor-fold defaultstate="collapsed" desc="Declarations, main and Constructor">
@@ -125,22 +125,12 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     public JTextArea locateATextArea(JPanel parentPanel, SpringLayout parentLayout, JTextArea myTextArea, int x, int y, int w, int h)
     {    
         myTextArea = new JTextArea(w,h);
+        myTextArea.addFocusListener(this);
         parentPanel.add(myTextArea);
         parentLayout.putConstraint(SpringLayout.WEST, myTextArea, x, SpringLayout.WEST, this);
         parentLayout.putConstraint(SpringLayout.NORTH, myTextArea, y, SpringLayout.NORTH, this);
         myTextArea.setBorder(BorderFactory.createLineBorder(Color.black));
         return myTextArea;
-    }
-
-    public JButton locateAButton(SpringLayout myButtonLayout, JButton myButton, String  ButtonCaption, int x, int y, int w, int h)
-    {    
-        myButton = new JButton(ButtonCaption);
-        basePanel.add(myButton);
-        myButton.addActionListener(this);
-        myButtonLayout.putConstraint(SpringLayout.WEST, myButton, x, SpringLayout.WEST, this);
-        myButtonLayout.putConstraint(SpringLayout.NORTH, myButton, y, SpringLayout.NORTH, this);
-        myButton.setPreferredSize(new Dimension(w,h));
-        return myButton;
     }
 
     public JButton locateSortButton(JPanel panel, SpringLayout myButtonLayout, JButton myButton, String  ButtonCaption, int x, int y, int w, int h)
@@ -624,6 +614,26 @@ public class SurveyByNetwork extends JFrame implements WindowListener, ActionLis
     public void windowDeiconified(WindowEvent e)  {  }
     public void windowActivated(WindowEvent e)  {  }
     public void windowDeactivated(WindowEvent e)  {  }
+
+    @Override
+    public void focusGained(FocusEvent e) {
+        if(e.getSource() == txtA) {
+            txtCorrectAnswer.setText(txtA.getText());
+        } else if (e.getSource() == txtB) {
+            txtCorrectAnswer.setText(txtB.getText());
+        } else if (e.getSource() == txtC) {
+            txtCorrectAnswer.setText(txtC.getText());
+        } else if (e.getSource() == txtD) {
+            txtCorrectAnswer.setText(txtD.getText());
+        } else if(e.getSource() == txtE) {
+            txtCorrectAnswer.setText(txtE.getText());
+        }
+    }
+
+    @Override
+    public void focusLost(FocusEvent e) {
+
+    }
 
 //</editor-fold>
     

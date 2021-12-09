@@ -5,10 +5,11 @@ import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
-public class SurveyQuestions extends JFrame implements WindowListener, ActionListener
+public class SurveyQuestions extends JFrame implements WindowListener, ActionListener, FocusListener
 {
     
 //<editor-fold defaultstate="collapsed" desc="Declarations, main and Constructor">
@@ -109,6 +110,7 @@ public class SurveyQuestions extends JFrame implements WindowListener, ActionLis
     public JTextArea locateATextArea(JPanel parentPanel, SpringLayout parentLayout, JTextArea myTextArea, int x, int y, int w, int h)
     {    
         myTextArea = new JTextArea(w,h);
+        myTextArea.addFocusListener(this);
         parentPanel.add(myTextArea);
         parentLayout.putConstraint(SpringLayout.WEST, myTextArea, x, SpringLayout.WEST, this);
         parentLayout.putConstraint(SpringLayout.NORTH, myTextArea, y, SpringLayout.NORTH, this);
@@ -253,16 +255,25 @@ public class SurveyQuestions extends JFrame implements WindowListener, ActionLis
 
     private void send()
     {
-        try
-        {
-            streamOut.writeUTF(txtAnswer.getText());
-            streamOut.flush();
-            txtAnswer.setText("");
-        }
-        catch (IOException ioe)
-        {
-            println("Sending error: " + ioe.getMessage());
-            close();
+        String topic = txtTopic.getText();
+        if(topic.length() > 0) {
+            String answer = txtAnswer.getText();
+            String[] validAnswers = new String[] { "1", "2", "3", "4", "5"};
+            if(answer.length() > 0 && Arrays.asList(validAnswers).contains(answer)) {
+                try
+                {
+                    streamOut.writeUTF(answer);
+                    streamOut.flush();
+                    txtAnswer.setText("");
+                }
+                catch (IOException ioe)
+                {
+                    println("Sending error: " + ioe.getMessage());
+                    close();
+                }
+            } else {
+                JOptionPane.showMessageDialog(null,"Please supply an answer number");
+            }
         }
     }
 
@@ -326,6 +337,26 @@ public class SurveyQuestions extends JFrame implements WindowListener, ActionLis
             txtD.setText(arr[6]);
             txtE.setText(arr[7]);
         }
+    }
+
+    @Override
+    public void focusGained(FocusEvent e) {
+        if(e.getSource() == txtA) {
+            txtAnswer.setText("1");
+        } else if (e.getSource() == txtB) {
+            txtAnswer.setText("2");
+        } else if (e.getSource() == txtC) {
+            txtAnswer.setText("3");
+        } else if (e.getSource() == txtD) {
+            txtAnswer.setText("4");
+        } else if(e.getSource() == txtE) {
+            txtAnswer.setText("5");
+        }
+    }
+
+    @Override
+    public void focusLost(FocusEvent e) {
+
     }
 
     public void windowOpened(WindowEvent e)  {  }

@@ -96,11 +96,7 @@ public class SurveyServer implements Runnable
         }
         else
         {
-            for (int i = 0; i < clientCount; i++)
-            {
-                //clients[i].send(ID + ": " + input);
-                surveyor.processSurveyResponse(input);
-            }
+            surveyor.processSurveyResponse(input);
         }
     }
 

@@ -13,23 +13,6 @@ public class SurveyResult {
         Average = "";
     }
 
-    public void setSurveyResultDetails(String[] surveyResultDetails)
-    {
-        Topic = surveyResultDetails[0];
-        Number = surveyResultDetails[1];
-        Average = surveyResultDetails[2];
-    }
-
-    public String[] getSurveyResultDetails()
-    {
-        String[] surveyResultDetails = new String[3];
-        surveyResultDetails[0] = Topic;
-        surveyResultDetails[1] = Number;
-        surveyResultDetails[2] = Average;
-
-        return surveyResultDetails;
-    }
-
     public String print()
     {
         return Topic + ", Qn " + Number + ", " + Average;
